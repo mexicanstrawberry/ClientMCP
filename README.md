@@ -62,7 +62,7 @@ avrdude for flashing the hardware controllers
     ```
     
     sudo apt-get update
-    sudo apt-get install python-pip git python-virtualenv python-rpi.gpio
+    sudo apt-get install python-pip git python-virtualenv python-rpi.gpio python-dev
     
     ```
 5. Setup the environment
