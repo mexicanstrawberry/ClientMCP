@@ -54,19 +54,25 @@ avrdude for flashing the hardware controllers
        ```
   11. Test connection 
       ```
+    
       sudo ./avrdude -C ./avrdude.conf -v -p atmega8 -c pi_1
+    
       ```
 4. Install python
     ```
+    
     sudo apt-get update
-    sudo apt-get install python-pip git python-virtualenv
+    sudo apt-get install python-pip git python-virtualenv python-rpi.gpio
+    
     ```
 5. Setup the environment
    ```
+   
    git clone https://github.com/mexicanstrawberry/ClientMCP.git
    cd /home/pi/MS/ClientMCP/Python
    virtualenv .
    pip install -r Pip-Packages.txt
+   
    ```
 9. Install couchDB
 
