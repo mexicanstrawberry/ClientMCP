@@ -61,7 +61,12 @@ avrdude for flashing the hardware controllers
     sudo apt-get update
     sudo apt-get install python-pip git python-virtualenv
     ```
-
+5. Setup the environment
+   ```
+   git clone /home/pi/MS/ClientMCP
+   cd /home/pi/MS/ClientMCP/Python
+   virtualenv .
+   ```
 9. Install couchDB
 
 
