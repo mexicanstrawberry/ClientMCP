@@ -1,24 +1,19 @@
-import spi
+import spidev
 import time
-import RPi.GPIO as GPIO
 
 class Controller():
 
-    INSIDE_CONTROLLER_SS_PIN  = 7
-    OUTSIDE_CONTROLLER_SS_PIN = 8
-    WATER_CONTROLLER_SS_PIN   = 25
-
     def __init__(self):
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.INSIDE_CONTROLLER_SS_PIN,  GPIO.OUT)
+        self._spi = spidev.SpiDev()
 
     def test(self):
-        a = False
-        for i in range(1000):
-            GPIO.output(self.INSIDE_CONTROLLER_SS_PIN, a)
-            a = not a
+        self._spi.open(0, 0)
+        self._spi.max_speed_hz = 5000
+        for i in range(5):
+            r = self._spi.xfer2([0x10,0x20,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF])
+            print "Firmware Major %d, Minor %d, BuildVersion %d" % (r[4],r[5],r[6])
             time.sleep(1)
+        self._spi.close()
 
 if __name__ == "__main__":
     c = Controller()
