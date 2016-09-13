@@ -42,15 +42,6 @@ avrdude for flashing the hardware controllers
         sck   = 11;
         mosi  = 10;
         miso  =  9;
-      
-      programmer
-        id    = "pi_3";
-        desc  = "Use the Linux sysfs interface to bitbang GPIO lines";
-        type  = "linuxgpio";
-        reset = 17;
-        sck   = 11;
-        mosi  = 10;
-        miso  =  9;
        ```
   11. Test connection 
       ```
