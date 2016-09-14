@@ -9,9 +9,10 @@ CMD
    00 PING Send Back the transmitted data with an offset of 1 (SPI) n data
    
 10 Firmware
-   00 GET Firmware Version          1 Byte Major  ,   1 Byte Minor,    1 Byte BuildVersion
-   10 GET Uptime                    1 Byte Days,      1 Byte Hours,    1 Byte Minutes,      1 Byte Seconds
-   20 SET Reboot                    1 Byte ASCII "M", 1 Byte ASCII "S"
+   00 GET Type                      1 Byte Type 00 -> Inside Controller 10 -> Outside Controller
+   10 GET Firmware Version          1 Byte Major  ,   1 Byte Minor,    1 Byte BuildVersion
+   20 GET Uptime                    1 Byte Days,      1 Byte Hours,    1 Byte Minutes,      1 Byte Seconds
+   30 SET Reboot                    1 Byte ASCII "M", 1 Byte ASCII "S"
 
 20 Sensor
    00 GET Temperature Outside       1 Byte Integer, 1 Byte Decimal
