@@ -30,7 +30,7 @@ CMD
    01 SET LightMovementSpeed
    02 GET LightMovementPosition
    03 SET LightMovementPosition
-   03 GET LightMovementCounter
+   04 GET LightMovementCounter
    10 GET LightFan1Speed
    11 SET LightFan1Speed
    12 GET Light1DesiredTemperature
@@ -59,5 +59,8 @@ CMD
    21 SET IntensityUV
    
 50 Heater
-   00 GET Heater
-   01 SET Heater
+   00 GET HeaterAir
+   01 SET HeaterAir
+   10 GET HeaterWater
+   11 SET HeaterWater
+   
