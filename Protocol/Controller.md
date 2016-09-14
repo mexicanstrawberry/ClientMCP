@@ -11,7 +11,7 @@ CMD
 10 Firmware
    00 GET Type                      1 Byte Type 00 -> Inside Controller 10 -> Outside Controller
    10 GET Firmware Version          1 Byte Major  ,   1 Byte Minor,    1 Byte BuildVersion
-   20 GET Uptime                    1 Byte Days,      1 Byte Hours,    1 Byte Minutes,      1 Byte Seconds
+   20 GET Uptime                    4 Byte Milliseconds
    30 SET Reboot                    1 Byte ASCII "M", 1 Byte ASCII "S"
 
 20 Sensor
