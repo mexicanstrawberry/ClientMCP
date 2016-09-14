@@ -2,7 +2,7 @@ uint8_t 1  CMD
 uint8_t 1  SubCMD
 uint8_t 1  Size
 uint8_t n  Data
-uint8_t 1  CRC CMD, SubCMD, Size, Data
+uint8_t 4  CRC over CMD, SubCMD, Size, Data
 
 CMD
 00 Network 
@@ -10,7 +10,7 @@ CMD
    
 10 Firmware
    00 GET Firmware Version          1 Byte Major  ,   1 Byte Minor,    1 Byte BuildVersion
-   10 GET Uptime                    1 Byte Year,      1 Byte Month,    1 Byte Day,          1 Byte Hour,   1 Byte Minute,  1 Byte Second
+   10 GET Uptime                    1 Byte Days,      1 Byte Hours,    1 Byte Minutes,      1 Byte Seconds
    20 SET Reboot                    1 Byte ASCII "M", 1 Byte ASCII "S"
 
 20 Sensor
@@ -29,9 +29,9 @@ CMD
 30 Motor
    00 GET LightMovementSpeed        1 Byte Herz 
    01 SET LightMovementSpeed        1 Byte Herz
-   02 GET LightMovementPosition     3 Byte Steps from left
-   03 SET LightMovementPosition     3 Byte Steps from left
-   04 GET LightMovementCounter      3 Byte Counter
+   02 GET LightMovementPosition     2 Byte Steps from left
+   03 SET LightMovementPosition     2 Byte Steps from left
+   04 GET LightMovementCounter      2 Byte Counter
    10 GET LightFan1Speed            1 Byte Percentage
    11 SET LightFan1Speed            1 Byte Percentage
    12 GET Light1DesiredTemperature  1 Byte Integer

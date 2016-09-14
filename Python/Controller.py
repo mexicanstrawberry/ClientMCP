@@ -1,10 +1,14 @@
 import spidev
 import time
+import binascii
 
 class Controller():
 
     def __init__(self):
         self._spi = spidev.SpiDev()
+
+    def _getCRC(self, cmd, subcmd, data):
+        return hex(binascii.crc32("HELLO") & 0xffffffff)
 
     def test(self):
         self._spi.open(0, 0)
