@@ -1,6 +1,5 @@
+*.log
+*~
 
 Python/clientconfig.txt
-
-*.log
-
 Python/config.txt
