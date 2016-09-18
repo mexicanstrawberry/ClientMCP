@@ -1,8 +1,10 @@
 import spidev
 import time
 import binascii
+import threading
 
-class Controller():
+
+class Controller(threading.Thread):
 
     INSIDE_CONTROLLER  = 0
     OUTSIDE_CONTROLLER = 1
@@ -63,7 +65,14 @@ class Controller():
     SUB_CMD_HEATER_SET_HEATER_WATER =               [0x50, 0x11]
 
     def __init__(self):
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
         self._spi = spidev.SpiDev()
+        self.start()
+
+    def run(self):
+        while True:
+            time.sleep(1)
 
     def _getCRC(self, cmd, subcmd, data):
         return hex(binascii.crc32("HELLO") & 0xffffffff)
@@ -80,7 +89,7 @@ class Controller():
         self._spi.close()
         return r[4:]
 
-    def pingTest(self, controller):
+    def _pingTest(self, controller):
         data = [0x23, 0x42, 0x69]
         r = self._xfer(controller, self.SUB_CMD_NETWORK_PING, data)
         for i in range(len(data)):
@@ -88,44 +97,44 @@ class Controller():
                 return False
         return True
 
-    def getControllerType(self, controller):
+    def _getControllerType(self, controller):
         r = self._xfer(controller, self.SUB_CMD_FIRMWARE_GET_CONTROLLER_TYPE)
         return r[0]
 
-    def getFirmwareVersion(self, controller):
+    def _getFirmwareVersion(self, controller):
         r = self._xfer(controller, self.SUB_CMD_FIRMWARE_GET_FIRMWARE_VERSION)
         return r[0:3]
 
-    def getUptime(self, controller):
+    def _getUptime(self, controller):
         r = self._xfer(controller, self.SUB_CMD_FIRMWARE_GET_UPTIME)
         return (r[0]<<(8*3))+(r[1]<<(8*2))+(r[2]<<(8*1))+(r[3]<<(8*0))
 
-    def reboot(self, controller):
+    def _reboot(self, controller):
         r = self._xfer(controller, self.SUB_CMD_FIRMWARE_SET_REBOOT,[0x4D,0x53])
         return (r[0] == 0x4F and r[1] == 0x4B)
 
-    def getTemperatureOutside(self):
+    def _getTemperatureOutside(self):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_OUTSIDE)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
         return v
 
-    def getTemperatureWater(self):
+    def _getTemperatureWater(self):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_WATER)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
         return v
 
-    def getTemperatureInside(self):
+    def _getTemperatureInside(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_INSIDE)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
         return v
 
-    def getTemperatureLight(self, number):
+    def _getTemperatureLight(self, number):
         if number == 1:
             r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT1)
         elif number == 2:
@@ -139,56 +148,56 @@ class Controller():
         v += r[1] / 100.0
         return v
 
-    def getHumidityOutside(self):
+    def _getHumidityOutside(self):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_HUMIDITY_OUTSIDE)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
         return v
 
-    def getHumidityInside(self):
+    def _getHumidityInside(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_HUMIDITY_INSIDE)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
         return v
 
-    def getCO2Level(self):
+    def _getCO2Level(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_CO2)
         return ((r[0]<<(8*1))+(r[1]<<(8*0)))
 
-    def getPHLevel(self):
+    def _getPHLevel(self):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_PH)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
         return v
 
-    def getRedoxLevel(self):
+    def _getRedoxLevel(self):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_REDOX)
         return ((r[0]<<(8*1))+(r[1]<<(8*0)))
 
-    def getLightMovementSpeed(self):
+    def _getLightMovementSpeed(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_LIGHT_MOVEMENT_SPEED)
         return r[0]
 
-    def setLightMovementSpeed(self, speed):
+    def _setLightMovementSpeed(self, speed):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_LIGHT_MOVEMENT_SPEED,[speed])
         return True
 
-    def getLightMovementPosition(self):
+    def _getLightMovementPosition(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_LIGHT_MOVEMENT_POSITION)
         return ((r[0]<<(8*1))+(r[1]<<(8*0)))
 
-    def setLightMovementPosition(self, speed):
+    def _setLightMovementPosition(self, speed):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_LIGHT_MOVEMENT_POSITION,[(speed >>8) & 0xFF , speed & 0xFF])
         return True
 
-    def getLightMovementCounter(self):
+    def _getLightMovementCounter(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_LIGHT_MOVEMENT_COUNTER)
         return ((r[0]<<(8*1))+(r[1]<<(8*0)))
 
-    def getLightFanSpeed(self, number):
+    def _getLightFanSpeed(self, number):
         if number == 1:
             r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_LIGHT_1_FAN_SPEED)
         elif number == 2:
@@ -199,7 +208,7 @@ class Controller():
             raise ValueError
         return r[0]
 
-    def setLightFanSpeed(self, number, speed):
+    def _setLightFanSpeed(self, number, speed):
         if number == 1:
             r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_LIGHT_1_FAN_SPEED,[speed])
         elif number == 2:
@@ -210,7 +219,7 @@ class Controller():
             raise ValueError
         return True
 
-    def getLightDesiredTemperature(self, number):
+    def _getLightDesiredTemperature(self, number):
         if number == 1:
             r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_LIGHT_1_DESIRED_TEMPERATURE)
         elif number == 2:
@@ -221,7 +230,7 @@ class Controller():
             raise ValueError
         return r[0]
 
-    def setLightDesiredTemperature(self, number, speed):
+    def _setLightDesiredTemperature(self, number, speed):
         if number == 1:
             r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_LIGHT_1_DESIRED_TEMPERATURE,[speed])
         elif number == 2:
@@ -232,134 +241,134 @@ class Controller():
             raise ValueError
         return True
 
-    def getHatch(self):
+    def _getHatch(self):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_HATCH)
         return r[0]
 
-    def setHatch(self, value):
+    def _setHatch(self, value):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_HATCH,[value])
         return True
 
-    def getOutsideFan(self):
+    def _getOutsideFan(self):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_OUTSIDE_FAN)
         return r[0]
 
-    def setOutsideFan(self, value):
+    def _setOutsideFan(self, value):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_OUTSIDE_FAN,[value])
         return True
 
-    def getInsideFan(self):
+    def _getInsideFan(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_INSIDE_FAN)
         return r[0]
 
-    def setInsideFan(self, value):
+    def _setInsideFan(self, value):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_INSIDE_FAN,[value])
         return True
 
-    def getIRLevel(self):
+    def _getIRLevel(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_LIGHT_GET_INTENSITY_IR)
         return r[0]
 
-    def setIRLevel(self, value):
+    def _setIRLevel(self, value):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_LIGHT_SET_INTENSITY_IR,[value])
         return True
 
-    def getFSLevel(self):
+    def _getFSLevel(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_LIGHT_GET_INTENSITY_FS)
         return r[0]
 
-    def setFSLevel(self, value):
+    def _setFSLevel(self, value):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_LIGHT_SET_INTENSITY_FS,[value])
         return True
 
-    def getUVLevel(self):
+    def _getUVLevel(self):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_LIGHT_GET_INTENSITY_UV)
         return r[0]
 
-    def setUVLevel(self, value):
+    def _setUVLevel(self, value):
         r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_LIGHT_SET_INTENSITY_UV,[value])
         return True
 
-    def getAirHeaterLevel(self):
+    def _getAirHeaterLevel(self):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_HEATER_GET_HEATER_AIR)
         return r[0]
 
-    def setAirHeaterLevel(self, value):
+    def _setAirHeaterLevel(self, value):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_HEATER_SET_HEATER_AIR,[value])
         return True
 
-    def getWaterHeaterLevel(self):
+    def _getWaterHeaterLevel(self):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_HEATER_GET_HEATER_WATER)
         return r[0]
 
-    def setWaterHeaterLevel(self, value):
+    def _setWaterHeaterLevel(self, value):
         r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_HEATER_SET_HEATER_WATER,[value])
         return True
 
     def test(self):
-        print "Controller Ping Test:%s" % self.pingTest(self.INSIDE_CONTROLLER)
+        print "Controller Ping Test:%s" % self._pingTest(self.INSIDE_CONTROLLER)
 
-        print "Controller Type:%d" % self.getControllerType(self.INSIDE_CONTROLLER)
-        print "Firmware %s" % self.getFirmwareVersion(self.INSIDE_CONTROLLER)
+        print "Controller Type:%d" % self._getControllerType(self.INSIDE_CONTROLLER)
+        print "Firmware %s" % self._getFirmwareVersion(self.INSIDE_CONTROLLER)
         for i in range(2):
-            print "Uptime %d" % self.getUptime(self.INSIDE_CONTROLLER)
+            print "Uptime %d" % self._getUptime(self.INSIDE_CONTROLLER)
             time.sleep(1)
-        print "Rebooting %d" % self.reboot(self.INSIDE_CONTROLLER)
+        print "Rebooting %d" % self._reboot(self.INSIDE_CONTROLLER)
         time.sleep(1)
-        print "Uptime %s" % self.getUptime(self.INSIDE_CONTROLLER)
+        print "Uptime %s" % self._getUptime(self.INSIDE_CONTROLLER)
 
-        print "Outside Temperature %f" % self.getTemperatureOutside()
-        print "Inside Temperature %f" % self.getTemperatureInside()
-        print "Water Temperature %f" % self.getTemperatureWater()
+        print "Outside Temperature %f" % self._getTemperatureOutside()
+        print "Inside Temperature %f" % self._getTemperatureInside()
+        print "Water Temperature %f" % self._getTemperatureWater()
         for i in range(1,4):
-            print "Light %d Temperature %f" %(i, self.getTemperatureLight(i))
-        print "Outside Humidity %f" % self.getHumidityOutside()
-        print "Inside Humidity %f" % self.getHumidityInside()
-        print "CO2 %d" % self.getCO2Level()
-        print "PH %f" % self.getPHLevel()
-        print "Redox %d" % self.getRedoxLevel()
+            print "Light %d Temperature %f" %(i, self._getTemperatureLight(i))
+        print "Outside Humidity %f" % self._getHumidityOutside()
+        print "Inside Humidity %f" % self._getHumidityInside()
+        print "CO2 %d" % self._getCO2Level()
+        print "PH %f" % self._getPHLevel()
+        print "Redox %d" % self._getRedoxLevel()
 
-        print "LightMovement %d" % self.getLightMovementSpeed()
-        self.setLightMovementSpeed(233)
-        print "LightMovement %d" % self.getLightMovementSpeed()
-        print "LightPosition %d" % self.getLightMovementPosition()
-        self.setLightMovementPosition(2333)
-        print "LightPosition %d" % self.getLightMovementPosition()
-        print "LightCounter %d" % self.getLightMovementCounter()
+        print "LightMovement %d" % self._getLightMovementSpeed()
+        self._setLightMovementSpeed(233)
+        print "LightMovement %d" % self._getLightMovementSpeed()
+        print "LightPosition %d" % self._getLightMovementPosition()
+        self._setLightMovementPosition(2333)
+        print "LightPosition %d" % self._getLightMovementPosition()
+        print "LightCounter %d" % self._getLightMovementCounter()
         for i in range(1,4):
-            print "LightFanSpeed %d is %d" % (i, self.getLightFanSpeed(i))
-            self.setLightFanSpeed(i, 123)
-            print "LightFanSpeed %d is %d" % (i, self.getLightFanSpeed(i))
-            print "LightDesiredTemperature %d is %d" % (i, self.getLightDesiredTemperature(i))
-            self.setLightDesiredTemperature(i, 123)
-            print "LightDesiredTemperature %d is %d" % (i, self.getLightDesiredTemperature(i))
-        print "Hatch %d" % self.getHatch()
-        self.setHatch(67)
-        print "Hatch %d" % self.getHatch()
+            print "LightFanSpeed %d is %d" % (i, self._getLightFanSpeed(i))
+            self._setLightFanSpeed(i, 123)
+            print "LightFanSpeed %d is %d" % (i, self._getLightFanSpeed(i))
+            print "LightDesiredTemperature %d is %d" % (i, self._getLightDesiredTemperature(i))
+            self._setLightDesiredTemperature(i, 123)
+            print "LightDesiredTemperature %d is %d" % (i, self._getLightDesiredTemperature(i))
+        print "Hatch %d" % self._getHatch()
+        self._setHatch(67)
+        print "Hatch %d" % self._getHatch()
 
-        print "Outside Fan %d" % self.getOutsideFan()
-        self.setOutsideFan(87)
-        print "Outside Fan %d" % self.getOutsideFan()
-        print "Inside Fan %d" % self.getInsideFan()
-        self.setInsideFan(96)
-        print "Inside Fan %d" % self.getInsideFan()
+        print "Outside Fan %d" % self._getOutsideFan()
+        self._setOutsideFan(87)
+        print "Outside Fan %d" % self._getOutsideFan()
+        print "Inside Fan %d" % self._getInsideFan()
+        self._setInsideFan(96)
+        print "Inside Fan %d" % self._getInsideFan()
 
-        print "IR Value %d" % self.getIRLevel()
-        self.setIRLevel(33)
-        print "IR Value %d" % self.getIRLevel()
-        print "FS Value %d" % self.getFSLevel()
-        self.setFSLevel(34)
-        print "FS Value %d" % self.getFSLevel()
-        print "UV Value %d" % self.getUVLevel()
-        self.setUVLevel(35)
-        print "UV Value %d" % self.getUVLevel()
+        print "IR Value %d" % self._getIRLevel()
+        self._setIRLevel(33)
+        print "IR Value %d" % self._getIRLevel()
+        print "FS Value %d" % self._getFSLevel()
+        self._setFSLevel(34)
+        print "FS Value %d" % self._getFSLevel()
+        print "UV Value %d" % self._getUVLevel()
+        self._setUVLevel(35)
+        print "UV Value %d" % self._getUVLevel()
 
-        print "Air Heater Level %d" % self.getAirHeaterLevel()
-        self.setAirHeaterLevel(75)
-        print "Air Heater Level %d" % self.getAirHeaterLevel()
-        print "Water Heater Level %d" % self.getWaterHeaterLevel()
-        self.setWaterHeaterLevel(76)
-        print "Water Heater Level %d" % self.getWaterHeaterLevel()
+        print "Air Heater Level %d" % self._getAirHeaterLevel()
+        self._setAirHeaterLevel(75)
+        print "Air Heater Level %d" % self._getAirHeaterLevel()
+        print "Water Heater Level %d" % self._getWaterHeaterLevel()
+        self._setWaterHeaterLevel(76)
+        print "Water Heater Level %d" % self._getWaterHeaterLevel()
 
 if __name__ == "__main__":
     c = Controller()
