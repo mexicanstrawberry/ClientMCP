@@ -2,7 +2,7 @@ import threading
 import os
 import time
 
-class SystemData(threading.Thread):
+class SystemSensor(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.setDaemon(True)
@@ -53,7 +53,7 @@ class SystemData(threading.Thread):
             time.sleep(1)
 
 if __name__ == '__main__':
-    sd = SystemData()
+    sd = SystemSensor()
     sd.start()
     time.sleep(5)
     print sd.getCPUTemp()
