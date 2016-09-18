@@ -20,8 +20,8 @@ def commandCallback(cmd):
         pass
     elif cmd.command == "Stepper":
         pass
-    elif cmd.command == "Picture":
-        pass
+    elif cmd.command == "Camera":
+        camera.makePicture()
 
     else:
         print "Unknown command, ignore"
