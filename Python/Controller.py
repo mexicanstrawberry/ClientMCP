@@ -4,74 +4,181 @@ import binascii
 import threading
 
 
+class ControllerException(Exception):
+    pass
+
+
 class Controller(threading.Thread):
 
-    INSIDE_CONTROLLER  = 0
-    OUTSIDE_CONTROLLER = 1
+    TEMPERATURE_OUTSIDE    =  1
+    TEMPERATURE_INSIDE     =  2
+    TEMPERATURE_WATER      =  3
+    TEMPERATURE_LIGHT_UV   =  4
+    TEMPERATURE_LIGHT_FS   =  5
+    TEMPERATURE_LIGHT_IR   =  6
+    HUMIDITY_OUTSIDE       =  7
+    HUMIDITY_INSIDE        =  8
+    CO2                    =  9
+    PH                     = 10
+    REDOX                  = 11
+    MOVEMENT_SPEED         = 12
+    MOVEMENT_POSITION      = 13
+    MOVEMENT_COUNTER       = 14
+    UV_FAN_SPEED           = 15
+    FS_FAN_SPEED           = 16
+    IR_FAN_SPEED           = 17
+    UV_DESIRED_TEMPERATURE = 18
+    FS_DESIRED_TEMPERATURE = 19
+    IR_DESIRED_TEMPERATURE = 20
+    HATCH                  = 21
+    OUTSIDE_FAN            = 22
+    INSIDE_FAN             = 23
+    INTENSITY_UV           = 24
+    INTENSITY_FS           = 25
+    INTENSITY_IR           = 26
+    HEATER_AIR             = 27
+    HEATER_WATER           = 28
 
-    SUB_CMD_NETWORK_PING =                          [0x00, 0x00]
+    INSIDE_CONTROLLER      = 0
+    OUTSIDE_CONTROLLER     = 1
 
-    SUB_CMD_FIRMWARE_GET_CONTROLLER_TYPE =          [0x10, 0x00]
-    SUB_CMD_FIRMWARE_GET_FIRMWARE_VERSION =         [0x10, 0x10]
-    SUB_CMD_FIRMWARE_GET_UPTIME =                   [0x10, 0x20]
-    SUB_CMD_FIRMWARE_SET_REBOOT =                   [0x10, 0x30]
+    SUB_CMD_NETWORK_PING =                           [0x00, 0x00]
 
-    SUB_CMD_SENSOR_GET_TEMPERATURE_OUTSIDE =        [0x20, 0x00]
-    SUB_CMD_SENSOR_GET_TEMPERATURE_INSIDE =         [0x20, 0x01]
-    SUB_CMD_SENSOR_GET_TEMPERATURE_WATER =          [0x20, 0x02]
-    SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT1 =         [0x20, 0x03]
-    SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT2 =         [0x20, 0x04]
-    SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT3 =         [0x20, 0x05]
-    SUB_CMD_SENSOR_GET_HUMIDITY_OUTSIDE =           [0x20, 0x10]
-    SUB_CMD_SENSOR_GET_HUMIDITY_INSIDE =            [0x20, 0x11]
-    SUB_CMD_SENSOR_GET_CO2 =                        [0x20, 0x20]
-    SUB_CMD_SENSOR_GET_PH =                         [0x20, 0x30]
-    SUB_CMD_SENSOR_GET_REDOX =                      [0x20, 0x40]
+    SUB_CMD_FIRMWARE_GET_CONTROLLER_TYPE =           [0x10, 0x00]
+    SUB_CMD_FIRMWARE_GET_FIRMWARE_VERSION =          [0x10, 0x10]
+    SUB_CMD_FIRMWARE_GET_UPTIME =                    [0x10, 0x20]
+    SUB_CMD_FIRMWARE_SET_REBOOT =                    [0x10, 0x30]
 
-    SUB_CMD_MOTOR_GET_LIGHT_MOVEMENT_SPEED =        [0x30, 0x00]
-    SUB_CMD_MOTOR_SET_LIGHT_MOVEMENT_SPEED =        [0x30, 0x01]
-    SUB_CMD_MOTOR_GET_LIGHT_MOVEMENT_POSITION =     [0x30, 0x02]
-    SUB_CMD_MOTOR_SET_LIGHT_MOVEMENT_POSITION =     [0x30, 0x03]
-    SUB_CMD_MOTOR_GET_LIGHT_MOVEMENT_COUNTER =      [0x30, 0x04]
-    SUB_CMD_MOTOR_GET_LIGHT_1_FAN_SPEED =           [0x30, 0x10]
-    SUB_CMD_MOTOR_SET_LIGHT_1_FAN_SPEED =           [0x30, 0x11]
-    SUB_CMD_MOTOR_GET_LIGHT_1_DESIRED_TEMPERATURE = [0x30, 0x12]
-    SUB_CMD_MOTOR_SET_LIGHT_1_DESIRED_TEMPERATURE = [0x30, 0x13]
-    SUB_CMD_MOTOR_GET_LIGHT_2_FAN_SPEED =           [0x30, 0x20]
-    SUB_CMD_MOTOR_SET_LIGHT_2_FAN_SPEED =           [0x30, 0x21]
-    SUB_CMD_MOTOR_GET_LIGHT_2_DESIRED_TEMPERATURE = [0x30, 0x22]
-    SUB_CMD_MOTOR_SET_LIGHT_2_DESIRED_TEMPERATURE = [0x30, 0x23]
-    SUB_CMD_MOTOR_GET_LIGHT_3_FAN_SPEED =           [0x30, 0x30]
-    SUB_CMD_MOTOR_SET_LIGHT_3_FAN_SPEED =           [0x30, 0x31]
-    SUB_CMD_MOTOR_GET_LIGHT_3_DESIRED_TEMPERATURE = [0x30, 0x32]
-    SUB_CMD_MOTOR_SET_LIGHT_3_DESIRED_TEMPERATURE = [0x30, 0x33]
-    SUB_CMD_MOTOR_GET_HATCH =                       [0x30, 0x40]
-    SUB_CMD_MOTOR_SET_HATCH =                       [0x30, 0x41]
-    SUB_CMD_MOTOR_GET_OUTSIDE_FAN =                 [0x30, 0x50]
-    SUB_CMD_MOTOR_SET_OUTSIDE_FAN =                 [0x30, 0x51]
-    SUB_CMD_MOTOR_GET_INSIDE_FAN =                  [0x30, 0x60]
-    SUB_CMD_MOTOR_SET_INSIDE_FAN =                  [0x30, 0x61]
+    SUB_CMD_SENSOR_GET_TEMPERATURE_OUTSIDE =         [0x20, 0x00]
+    SUB_CMD_SENSOR_GET_TEMPERATURE_INSIDE =          [0x20, 0x01]
+    SUB_CMD_SENSOR_GET_TEMPERATURE_WATER =           [0x20, 0x02]
+    SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT_UV =        [0x20, 0x03]
+    SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT_FS =        [0x20, 0x04]
+    SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT_IR =        [0x20, 0x05]
+    SUB_CMD_SENSOR_GET_HUMIDITY_OUTSIDE =            [0x20, 0x10]
+    SUB_CMD_SENSOR_GET_HUMIDITY_INSIDE =             [0x20, 0x11]
+    SUB_CMD_SENSOR_GET_CO2 =                         [0x20, 0x20]
+    SUB_CMD_SENSOR_GET_PH =                          [0x20, 0x30]
+    SUB_CMD_SENSOR_GET_REDOX =                       [0x20, 0x40]
 
-    SUB_CMD_LIGHT_GET_INTENSITY_IR =                [0x40, 0x00]
-    SUB_CMD_LIGHT_SET_INTENSITY_IR =                [0x40, 0x01]
-    SUB_CMD_LIGHT_GET_INTENSITY_FS =                [0x40, 0x10]
-    SUB_CMD_LIGHT_SET_INTENSITY_FS =                [0x40, 0x11]
-    SUB_CMD_LIGHT_GET_INTENSITY_UV =                [0x40, 0x20]
-    SUB_CMD_LIGHT_SET_INTENSITY_UV =                [0x40, 0x21]
+    SUB_CMD_MOTOR_GET_LIGHT_MOVEMENT_SPEED =         [0x30, 0x00]
+    SUB_CMD_MOTOR_SET_LIGHT_MOVEMENT_SPEED =         [0x30, 0x01]
+    SUB_CMD_MOTOR_GET_LIGHT_MOVEMENT_POSITION =      [0x30, 0x02]
+    SUB_CMD_MOTOR_SET_LIGHT_MOVEMENT_POSITION =      [0x30, 0x03]
+    SUB_CMD_MOTOR_GET_LIGHT_MOVEMENT_COUNTER =       [0x30, 0x04]
+    SUB_CMD_MOTOR_GET_LIGHT_UV_FAN_SPEED =           [0x30, 0x10]
+    SUB_CMD_MOTOR_SET_LIGHT_UV_FAN_SPEED =           [0x30, 0x11]
+    SUB_CMD_MOTOR_GET_LIGHT_UV_DESIRED_TEMPERATURE = [0x30, 0x12]
+    SUB_CMD_MOTOR_SET_LIGHT_UV_DESIRED_TEMPERATURE = [0x30, 0x13]
+    SUB_CMD_MOTOR_GET_LIGHT_FS_FAN_SPEED =           [0x30, 0x20]
+    SUB_CMD_MOTOR_SET_LIGHT_FS_FAN_SPEED =           [0x30, 0x21]
+    SUB_CMD_MOTOR_GET_LIGHT_FS_DESIRED_TEMPERATURE = [0x30, 0x22]
+    SUB_CMD_MOTOR_SET_LIGHT_FS_DESIRED_TEMPERATURE = [0x30, 0x23]
+    SUB_CMD_MOTOR_GET_LIGHT_IR_FAN_SPEED =           [0x30, 0x30]
+    SUB_CMD_MOTOR_SET_LIGHT_IR_FAN_SPEED =           [0x30, 0x31]
+    SUB_CMD_MOTOR_GET_LIGHT_IR_DESIRED_TEMPERATURE = [0x30, 0x32]
+    SUB_CMD_MOTOR_SET_LIGHT_IR_DESIRED_TEMPERATURE = [0x30, 0x33]
+    SUB_CMD_MOTOR_GET_HATCH =                        [0x30, 0x40]
+    SUB_CMD_MOTOR_SET_HATCH =                        [0x30, 0x41]
+    SUB_CMD_MOTOR_GET_OUTSIDE_FAN =                  [0x30, 0x50]
+    SUB_CMD_MOTOR_SET_OUTSIDE_FAN =                  [0x30, 0x51]
+    SUB_CMD_MOTOR_GET_INSIDE_FAN =                   [0x30, 0x60]
+    SUB_CMD_MOTOR_SET_INSIDE_FAN =                   [0x30, 0x61]
 
-    SUB_CMD_HEATER_GET_HEATER_AIR =                 [0x50, 0x00]
-    SUB_CMD_HEATER_SET_HEATER_AIR =                 [0x50, 0x01]
-    SUB_CMD_HEATER_GET_HEATER_WATER =               [0x50, 0x10]
-    SUB_CMD_HEATER_SET_HEATER_WATER =               [0x50, 0x11]
+    SUB_CMD_LIGHT_GET_INTENSITY_IR =                 [0x40, 0x00]
+    SUB_CMD_LIGHT_SET_INTENSITY_IR =                 [0x40, 0x01]
+    SUB_CMD_LIGHT_GET_INTENSITY_FS =                 [0x40, 0x10]
+    SUB_CMD_LIGHT_SET_INTENSITY_FS =                 [0x40, 0x11]
+    SUB_CMD_LIGHT_GET_INTENSITY_UV =                 [0x40, 0x20]
+    SUB_CMD_LIGHT_SET_INTENSITY_UV =                 [0x40, 0x21]
+
+    SUB_CMD_HEATER_GET_HEATER_AIR =                  [0x50, 0x00]
+    SUB_CMD_HEATER_SET_HEATER_AIR =                  [0x50, 0x01]
+    SUB_CMD_HEATER_GET_HEATER_WATER =                [0x50, 0x10]
+    SUB_CMD_HEATER_SET_HEATER_WATER =                [0x50, 0x11]
+
+    def _controllerTest(self):
+
+        if not self._pingTest(self.INSIDE_CONTROLLER):
+            raise ControllerException("No controller not responding on SPI0.0")
+
+        if not self._pingTest(self.OUTSIDE_CONTROLLER):
+            raise ControllerException("No controller not responding on SPI0.1")
+
+        if self._getControllerType(self.INSIDE_CONTROLLER) != self.INSIDE_CONTROLLER:
+            raise ControllerException("Inside Controller not connected on SPI0.0")
+
+        if self._getControllerType(self.OUTSIDE_CONTROLLER) != self.OUTSIDE_CONTROLLER:
+            raise ControllerException("Outside Controller not connected on SPI0.0")
+
+        insideControllerFirmware = self._getFirmwareVersion(self.INSIDE_CONTROLLER)
+
+        if insideControllerFirmware[0] != 0x05 or insideControllerFirmware[1] != 0x23 or insideControllerFirmware[2] != 0x42:
+            raise ControllerException("Inside Controller has wrong firmware")
+
+        outsideControllerFirmware = self._getFirmwareVersion(self.OUTSIDE_CONTROLLER)
+
+        if outsideControllerFirmware[0] != 0x05 or outsideControllerFirmware[1] != 0x23 or outsideControllerFirmware[
+            2] != 0x42:
+            raise ControllerException("Outside Controller has wrong firmware")
+
+    def _setSafeParameters(self):
+        self._setAirHeaterLevel(0)
+        self._setFSLevel(0)
+        self._setHatch(100) # full open
+        self._setInsideFan(0)
+        self._setIRLevel(0)
+        for i in range(1,4):
+            self._setLightDesiredTemperature(i, 42)
+            self._setLightFanSpeed(i, 50)
+        self._setLightMovementPosition(0) # Deactivate fix position
+        self._setLightMovementSpeed(0)
+        self._setOutsideFan(0)
+        self._setUVLevel(0)
+        self._setWaterHeaterLevel(0)
 
     def __init__(self):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self._spi = spidev.SpiDev()
+        self.state = {}
+        self._controllerTest()
+        self._setSafeParameters()
         self.start()
+
+    def _measure(self):
+        self.state[self.TEMPERATURE_OUTSIDE]    = self._getTemperatureOutside()
+        self.state[self.TEMPERATURE_INSIDE]     = self._getTemperatureInside()
+        self.state[self.TEMPERATURE_WATER]      = self._getTemperatureWater()
+        self.state[self.TEMPERATURE_LIGHT_UV]   = self._getTemperatureLight(1)
+        self.state[self.TEMPERATURE_LIGHT_FS]   = self._getTemperatureLight(2)
+        self.state[self.TEMPERATURE_LIGHT_IR]   = self._getTemperatureLight(3)
+        self.state[self.HUMIDITY_OUTSIDE]       = self._getHumidityOutside()
+        self.state[self.HUMIDITY_INSIDE]        = self._getHumidityInside()
+        self.state[self.CO2]                    = self._getCO2Level()
+        self.state[self.PH]                     = self._getPHLevel()
+        self.state[self.REDOX]                  = self._getRedoxLevel()
+        self.state[self.MOVEMENT_SPEED]         = self._getLightMovementSpeed()
+        self.state[self.MOVEMENT_POSITION]      = self._getLightMovementPosition()
+        self.state[self.MOVEMENT_COUNTER]       = self._getLightMovementCounter()
+        self.state[self.UV_FAN_SPEED]           = self._getLightFanSpeed(1)
+        self.state[self.FS_FAN_SPEED]           = self._getLightFanSpeed(2)
+        self.state[self.IR_FAN_SPEED]           = self._getLightFanSpeed(3)
+        self.state[self.UV_DESIRED_TEMPERATURE] = self._getLightDesiredTemperature(1)
+        self.state[self.FS_DESIRED_TEMPERATURE] = self._getLightDesiredTemperature(2)
+        self.state[self.IR_DESIRED_TEMPERATURE] = self._getLightDesiredTemperature(3)
+        self.state[self.HATCH]                  = self._getHatch()
+        self.state[self.OUTSIDE_FAN]            = self._getOutsideFan()
+        self.state[self.INSIDE_FAN]             = self._getInsideFan()
+        self.state[self.INTENSITY_UV]           = self._getUVLevel()
+        self.state[self.INTENSITY_FS]           = self._getFSLevel()
+        self.state[self.INTENSITY_IR]           = self._getIRLevel()
+        self.state[self.HEATER_AIR]             = self._getAirHeaterLevel()
+        self.state[self.HEATER_WATER]           = self._getWaterHeaterLevel()
 
     def run(self):
         while True:
+            self._measure()
             time.sleep(1)
 
     def _getCRC(self, cmd, subcmd, data):
@@ -136,11 +243,11 @@ class Controller(threading.Thread):
 
     def _getTemperatureLight(self, number):
         if number == 1:
-            r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT1)
+            r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT_UV)
         elif number == 2:
-            r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT2)
+            r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT_FS)
         elif number == 3:
-            r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT3)
+            r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_LIGHT_IR)
         else:
             raise ValueError
         v = 0.0
