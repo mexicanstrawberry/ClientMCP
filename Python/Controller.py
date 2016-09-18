@@ -102,17 +102,17 @@ class Controller():
 
     def reboot(self, controller):
         r = self._xfer(controller, self.SUB_CMD_FIRMWARE_SET_REBOOT,[0x4D,0x53])
-        return (r[0] == 0x00 and r[1] == 0x00)
+        return (r[0] == 0x4F and r[1] == 0x4B)
 
     def getTemperatureOutside(self):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_OUTSIDE)
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_OUTSIDE)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
         return v
 
     def getTemperatureWater(self):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_WATER)
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_TEMPERATURE_WATER)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
@@ -140,7 +140,7 @@ class Controller():
         return v
 
     def getHumidityOutside(self):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_HUMIDITY_OUTSIDE)
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_HUMIDITY_OUTSIDE)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
@@ -158,14 +158,14 @@ class Controller():
         return ((r[0]<<(8*1))+(r[1]<<(8*0)))
 
     def getPHLevel(self):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_PH)
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_PH)
         v = 0.0
         v += r[0]
         v += r[1] / 100.0
         return v
 
     def getRedoxLevel(self):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_REDOX)
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_SENSOR_GET_REDOX)
         return ((r[0]<<(8*1))+(r[1]<<(8*0)))
 
     def getLightMovementSpeed(self):
@@ -233,19 +233,19 @@ class Controller():
         return True
 
     def getHatch(self):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_HATCH)
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_HATCH)
         return r[0]
 
     def setHatch(self, value):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_HATCH,[value])
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_HATCH,[value])
         return True
 
     def getOutsideFan(self):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_OUTSIDE_FAN)
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_MOTOR_GET_OUTSIDE_FAN)
         return r[0]
 
     def setOutsideFan(self, value):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_OUTSIDE_FAN,[value])
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_MOTOR_SET_OUTSIDE_FAN,[value])
         return True
 
     def getInsideFan(self):
@@ -281,24 +281,20 @@ class Controller():
         return True
 
     def getAirHeaterLevel(self):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_HEATER_GET_HEATER_AIR)
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_HEATER_GET_HEATER_AIR)
         return r[0]
 
     def setAirHeaterLevel(self, value):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_HEATER_SET_HEATER_AIR,[value])
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_HEATER_SET_HEATER_AIR,[value])
         return True
 
     def getWaterHeaterLevel(self):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_HEATER_GET_HEATER_WATER)
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_HEATER_GET_HEATER_WATER)
         return r[0]
 
     def setWaterHeaterLevel(self, value):
-        r = self._xfer(self.INSIDE_CONTROLLER, self.SUB_CMD_HEATER_SET_HEATER_WATER,[value])
+        r = self._xfer(self.OUTSIDE_CONTROLLER, self.SUB_CMD_HEATER_SET_HEATER_WATER,[value])
         return True
-
-
-
-
 
     def test(self):
         print "Controller Ping Test:%s" % self.pingTest(self.INSIDE_CONTROLLER)
@@ -341,14 +337,12 @@ class Controller():
         self.setHatch(67)
         print "Hatch %d" % self.getHatch()
 
-
         print "Outside Fan %d" % self.getOutsideFan()
         self.setOutsideFan(87)
         print "Outside Fan %d" % self.getOutsideFan()
         print "Inside Fan %d" % self.getInsideFan()
         self.setInsideFan(96)
         print "Inside Fan %d" % self.getInsideFan()
-
 
         print "IR Value %d" % self.getIRLevel()
         self.setIRLevel(33)
