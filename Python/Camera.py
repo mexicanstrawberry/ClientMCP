@@ -6,7 +6,7 @@ import datetime
 import time
 import os
 
-class Picture(threading.Thread):
+class Camera(threading.Thread):
 
     def __init__(self, id):
         threading.Thread.__init__(self)
@@ -78,7 +78,7 @@ class Picture(threading.Thread):
 if __name__ == '__main__':
 
     print "Testing Campera"
-    p = Picture("dummy1")
+    p = Camera("dummy1")
     p.start()
     p.makePicture()
     time.sleep(15)
